@@ -9,6 +9,37 @@
 #define FIFO_PATH "fifo0001"
 
 
+char* concat(const char *str1, const char *str2)
+{
+    char *result = malloc(strlen(str1) + strlen(str2) + 1);
+    strcpy(result, str1);
+    strcat(result, str2);
+    return result;
+}
+
+char* toChar(int num){
+	char* ch;
+	ch = (char*)malloc(10 * sizeof(char));
+	int numOfDigits = 0;
+	while(num > 9){
+		ch[numOfDigits++] = (num % 10) + '0';
+		num = num / 10;
+	}
+	ch[numOfDigits++] = num + '0';
+	ch[numOfDigits] = '\0';
+	char t;
+
+	for (int i = 0; i < numOfDigits/2; i++){
+		t = ch[i];
+		ch[i] = ch[numOfDigits - 1 - i];
+		ch[numOfDigits - 1 - i] = t;
+	}
+	numOfDigits = 0;
+	return ch;
+
+}
+
+
 int main() {
     unlink(FIFO_PATH);
 
@@ -27,29 +58,22 @@ int main() {
 			
         case 0:
  
-            puts("HI, STDOUT!!!");
-
             int fifo_child = open(FIFO_PATH, O_RDONLY);
             if (fifo_child == -1) {
                 fprintf(stderr, "Невозможно открыть FIFO\n");
                 exit(EXIT_FAILURE);
             }
-
-            long int child_buffer[2];
-            if (read(fifo_child, &child_buffer[0], sizeof(long int)) == -1 || read(fifo_child, &child_buffer[1], sizeof(long int)) == -1) {
-                fprintf(stderr, "Невозможно считать с FIFO\n");
-                exit(EXIT_FAILURE);
-            }
-
-            sleep(5);
-            time_t child_time = time(NULL);
-            printf("\nВремя: %s", ctime(&child_time));
-
-            printf("Родительское время: %s", ctime(&child_buffer[0]));
-            printf("\nРодительский PID: %lu\n", child_buffer[1]);
-
-            close(fifo_child);
-            exit(0);
+										
+			char buffer[1024];
+			read(fifo_child, &buffer, sizeof(buffer));
+			printf("%s", buffer);
+	       	close(fifo_child);	
+		
+			long int chTime = time(NULL);
+			printf("Текущее время в дочернем процессе: %s", ctime(&chTime));
+		
+			sleep(5);
+				
         default:
 
             int fifo_parent = open(FIFO_PATH, O_WRONLY);
@@ -57,18 +81,25 @@ int main() {
                 fprintf(stderr, "Невозможно открыть FIFO\n");
                 exit(EXIT_FAILURE);
             }
+			
+			long int pTime = time(NULL);
+			int pid = getpid();
 
-            long int parent_buffer[2];
-            parent_buffer[0] = time(NULL);
-            parent_buffer[1] = getpid();
+			char *str = "Текущее время в родительском процессе: ";
+			str = concat(str, ctime(&pTime));
+			str = concat(str, " PID родительского процесса: ");
+			str = concat(str, toChar(pid));
+			str = concat(str, "\n");
 
-            write(fifo_parent, parent_buffer, sizeof parent_buffer);
-            close(fifo_parent);
-
-            if (wait(0) == -1) {
-                perror("WAIT ошибка");
+			write(fifo_parent, (void *) str, strlen(str) + 1);
+			close(fifo_parent);
+			
+			if (waitpid(pid, 0, 0) == -1) {
+                perror("WAIT Ошибка");
                 exit(EXIT_FAILURE);
             }
+			
+			
     }
 
     return 0;

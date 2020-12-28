@@ -45,7 +45,7 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    while (true) {
+    while (1) {
         value local_value;
 
         time_t local_time = time(NULL);

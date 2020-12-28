@@ -55,7 +55,7 @@ int main(void) {
         exit(0);
     }
 
-    while (true) {
+    while (1) {
         value tmp_value;
 
         time_t t = time(NULL);

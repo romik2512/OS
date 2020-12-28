@@ -4,6 +4,37 @@
 #include <time.h>
 #include <sys/wait.h>
 
+
+char* concat(const char *str1, const char *str2)
+{
+    char *result = malloc(strlen(str1) + strlen(str2) + 1);
+    strcpy(result, str1);
+    strcat(result, str2);
+    return result;
+}
+
+char* toChar(int num){
+	char* ch;
+	ch = (char*)malloc(10 * sizeof(char));
+	int numOfDigits = 0;
+	while(num > 9){
+		ch[numOfDigits++] = (num % 10) + '0';
+		num = num / 10;
+	}
+	ch[numOfDigits++] = num + '0';
+	ch[numOfDigits] = '\0';
+	char t;
+
+	for (int i = 0; i < numOfDigits/2; i++){
+		t = ch[i];
+		ch[i] = ch[numOfDigits - 1 - i];
+		ch[numOfDigits - 1 - i] = t;
+	}
+	numOfDigits = 0;
+	return ch;
+
+}
+
 int main() {
 	
     int for_pipe[2];  
@@ -20,39 +51,37 @@ int main() {
             perror("Fork ошибка");
             exit(EXIT_FAILURE); 
         case 0:
-
-            close(for_pipe[1]); 
-
-            sleep(5);
-            long int child_buffer[2];
-
-            time_t child_time = time(NULL);
-            printf("Время: %s", ctime(&child_time));
-
-            read(for_pipe[0], &child_buffer[0], sizeof(long int));
-            printf("Родительское время: %s", ctime(&child_buffer[0]));
-
-            read(for_pipe[0], &child_buffer[1], sizeof(long int));
-            printf("\nРодительский PID: %lu\n", child_buffer[1]);
-
-            close(for_pipe[0]);
-            exit(0);
+		
+			long int chTime = time(NULL);
+			char buffer[1024];
+			int len;
+			close(for_pipe[1]);
+			while((len = read(for_pipe[0], buffer, 1024)) != 0)
+			write(2, buffer, len);
+			close(for_pipe[0]);
+			printf("Текущее время в дочернем процессе: %s", ctime(&chTime));
+			sleep(5);
+																			
         default:
+          						
+			long int pTime = time(NULL);
+			int pid = getpid();
 
-            close(for_pipe[0]); 
-
-            long int parent_buffer[2];
+			char *str = "Текущее время в родительском процессе: ";
+			str = concat(str, ctime(&pTime));
+			str = concat(str, " PID родительского процесса: ");
+			str = concat(str, toChar(pid));
+			str = concat(str, "\n");
+		
+			close(for_pipe[0]);
+			write(for_pipe[1], (void *) str, strlen(str) + 1);
+			close(for_pipe[1]);
 			
-            parent_buffer[0] = time(NULL);
-            parent_buffer[1] = getpid();
-
-            write(for_pipe[1], parent_buffer, sizeof parent_buffer);
-            close(for_pipe[1]);
-
-            if (wait(0) == -1) {
-                perror("Wait ошибка");
+			if (waitpid(pid, 0, 0) == -1) {
+                perror("WAIT Ошибка");
                 exit(EXIT_FAILURE);
             }
+			
     }
 
     return 0;
