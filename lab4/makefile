@@ -3,5 +3,5 @@ FLAGS=-pthread -o
 all: compile
 
 compile:
-	$(CC) lab_4_r.c  $(FLAGS) READ
-	$(CC) lab_4_w.c $(FLAGS) WRITE
+	$(CC) lab4_r.c  $(FLAGS) READ
+	$(CC) lab4_w.c $(FLAGS) WRITE
