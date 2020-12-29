@@ -29,7 +29,7 @@ int main ()
 		printf("Это процесс родитель, его PID: %d\n", getpid());
 		printf("Это процесс родитель, его PPID: %d\n", getppid());
 		printf("Ждем завершения потомка...\n");
-		waitpid(pid, 0, 0)	
+		waitpid(pid, 0, 0);	
 	
 		exit(0);
 	}
