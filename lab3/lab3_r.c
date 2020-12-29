@@ -10,9 +10,10 @@
 
 #define FILE_PATH "lab3_r.c" 
 #define IPC_ID 45
+#define STRING_SIZE 200
 
 typedef struct Value {
-    char str[200];
+    char str[STRING_SIZE];
     pid_t pid;
 } value;
 
@@ -49,14 +50,14 @@ int main(void) {
         value local_value;
 
         time_t local_time = time(NULL);
-        strncpy((char *) local_value.str, ctime(&local_time), 199);
-        local_value.str[199] = '\0';
+        strncpy((char *) local_value.str, ctime(&local_time), STRING_SIZE-1);
+        local_value.str[STRING_SIZE-1] = '\0';
         local_value.pid = getpid();
 
 
         printf("PID: %d, ВРЕМЯ: %s \n", local_value.pid, local_value.str);
         printf("Полученные PID: %d, ВРЕМЯ: %s\n", received_value->pid, received_value->str);
 
-        sleep(2);
+        sleep(1);
     }
 }

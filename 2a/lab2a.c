@@ -4,6 +4,7 @@
 #include <time.h>
 #include <sys/wait.h>
 
+#define BUFFER_SIZE 1024
 
 char* concat(const char *str1, const char *str2)
 {
@@ -53,10 +54,10 @@ int main() {
         case 0:
 		
 			long int chTime = time(NULL);
-			char buffer[1024];
+			char buffer[BUFFER_SIZE];
 			int len;
 			close(for_pipe[1]);
-			while((len = read(for_pipe[0], buffer, 1024)) != 0)
+			while((len = read(for_pipe[0], buffer, BUFFER_SIZE)) != 0)
 			write(2, buffer, len);
 			close(for_pipe[0]);
 			printf("Текущее время в дочернем процессе: %s", ctime(&chTime));

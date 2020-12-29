@@ -10,9 +10,10 @@
 
 #define FILE_PATH "lab3_r.c" 
 #define IPC_ID 45
+#define STRING_SIZE 200
 
 typedef struct Value {
-    char str[200];
+    char str[STRING_SIZE];
     pid_t pid;
 } value;
 
@@ -59,14 +60,14 @@ int main(void) {
         value tmp_value;
 
         time_t t = time(NULL);
-        strncpy((char *) tmp_value.str, ctime(&t), 199);
-        tmp_value.str[199] = '\0';
+        strncpy((char *) tmp_value.str, ctime(&t), STRING_SIZE-1);
+        tmp_value.str[STRING_SIZE-1] = '\0';
 
         tmp_value.pid = getpid();
 
         printf("Данные отправлены!\n");
         *forward_value = tmp_value;
 
-        sleep(2); 
+        sleep(1); 
     }
 }

@@ -14,6 +14,7 @@
 #define IPC 77
 #define FILE_PATH "lab4_r.c"
 #define SEMAPHORE_NAME "SEMAPHORE_1"
+#define STRING_SIZE 100
 
 int shmID;
 
@@ -21,7 +22,7 @@ struct sembuf semsignal = { 0, 1, SEM_UNDO };
 struct sembuf semwait = { 0, -1, SEM_UNDO };
 
 typedef struct Value {
-	char str[100];
+	char str[STRING_SIZE];
 	pid_t pid;
 } value;
 
@@ -68,8 +69,8 @@ int main(){
 		}	
 		
 		myValue.pid = getpid();
-		strncpy((char *) myValue.str, ctime(&local_time), 99);
-        myValue.str[99] = '\0';
+		strncpy((char *) myValue.str, ctime(&local_time), STRING_SIZE-1);
+        myValue.str[STRING_SIZE-1] = '\0';
 		
 		
 		printf("PID: %d, Время: %s \n", myValue.pid, myValue.str);

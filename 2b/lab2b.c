@@ -8,6 +8,8 @@
 
 #define FIFO_PATH "fifo0001"
 
+#define BUFFER_SIZE 1024
+
 
 char* concat(const char *str1, const char *str2)
 {
@@ -64,7 +66,7 @@ int main() {
                 exit(EXIT_FAILURE);
             }
 										
-			char buffer[1024];
+			char buffer[BUFFER_SIZE];
 			read(fifo_child, &buffer, sizeof(buffer));
 			printf("%s", buffer);
 	       	close(fifo_child);	
