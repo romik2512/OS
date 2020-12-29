@@ -8,36 +8,35 @@ pthread_rwlock_t rwlock;
 #define SIZE_OF_ARR 20
 #define NUMBER_OF_THREADS 10
 
-int* arr;
+int arr[SIZE_OF_ARR];
 int counter=0;
 
 
 void* readT(){
 	while(1){
 		pthread_rwlock_wrlock(&rwlock);
-		printf("ID потока: %ld, Размер массива: %d, Счетчик: %d\n", (long)pthread_self(), arr[counter], counter);
+		printf("ID потока: %ld, Значение ячейки: %d, Счетчик: %d\n", (long)pthread_self(), arr[counter], counter);
 		fflush(stdout);
 		pthread_rwlock_unlock(&rwlock);
+		if (counter == SIZE_OF_ARR)
+            pthread_exit(0);
 		sleep(1);
 	}
 
 }
 
 void* writeT(){
-	while(1){
+	while(counter < SIZE_OF_ARR){
 		pthread_rwlock_rdlock(&rwlock);
 		counter++;
-		if(counter < SIZE_OF_ARR){
-			arr[counter] = counter;
-		}
+		arr[counter] = counter;
 		pthread_rwlock_unlock(&rwlock);
 		sleep(1);
 	}
-
+pthread_exit(0);
 }
 
 int main(){
-	arr = (int*)calloc(SIZE_OF_ARR, sizeof(int));
 	pthread_t threads[NUMBER_OF_THREADS];
 	pthread_rwlock_init(&rwlock, NULL);
 	
@@ -55,7 +54,6 @@ int main(){
 	
 	pthread_rwlock_destroy(&rwlock);
 
-	free(arr);
 	return 0;
 
 }

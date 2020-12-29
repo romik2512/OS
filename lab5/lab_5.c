@@ -8,56 +8,50 @@ pthread_mutex_t mutex;
 #define SIZE_OF_ARR 20
 #define NUMBER_OF_THREADS 10
 
-int* arr;
+int arr[SIZE_OF_ARR];
 int counter=0;
 
 
 void* readT(){
 	while(1){
 		pthread_mutex_lock(&mutex);
-		printf("ID потока: %ld, Размер массива: %d, Счетчик: %d\n", (long)pthread_self(), arr[counter], counter);
+		printf("ID потока: %ld, Значение ячейки: %d, Счетчик: %d\n", (long)pthread_self(), arr[counter], counter);
 		fflush(stdout);
 		pthread_mutex_unlock(&mutex);
-		sleep(3);
+		if (counter == SIZE_OF_ARR)
+            pthread_exit(0);
+		sleep(1);
 	}
 
 }
 
 void* writeT(){
-	while(1){
+	while(counter < SIZE_OF_ARR){
 		pthread_mutex_lock(&mutex);
 		counter++;
-		if(counter < SIZE_OF_ARR){
-			arr[counter] = counter;
-		}
+		arr[counter] = counter;
 		pthread_mutex_unlock(&mutex);
-		sleep(3);
+		sleep(1);
 	}
-
+	
+	pthread_exit(0);
 }
 
 int main(){
-	arr = (int*)calloc(SIZE_OF_ARR, sizeof(int));
 	pthread_t threads[NUMBER_OF_THREADS];
-	pthread_t writer_thread;
-	
+
 	int i;
 	
-	pthread_create(&writer_thread, NULL, writeT, NULL);
+	pthread_create(&threads[0], NULL, writeT, NULL);
 	
-	for(i = 0; i < NUMBER_OF_THREADS; i++){
+	for(i = 0; i < NUMBER_OF_THREADS; i++)
 		pthread_create(&threads[i], NULL, readT, NULL);
-	}
-
-	for(i = 0; i < NUMBER_OF_THREADS; i++){
-		pthread_join(threads[i], NULL);
-	}
 	
-	pthread_join(writer_thread, NULL);
+	for(i = 0; i < NUMBER_OF_THREADS; i++)
+		pthread_join(threads[i], NULL);
 	
 	pthread_mutex_destroy(&mutex);
 
-	free(arr);
 	return 0;
 
 }
